@@ -1,0 +1,33 @@
+[
+{
+    "accountNo" : "1111",
+    "status" : "Y",
+    "lastUpdate" : {
+        "at" : "2021-02-02",
+        "by" : "nakul"
+    },
+    "relVal" : [{"to" : "10", "from" : "51"},
+    {"to" : "12", "from" : "99"}]
+},
+{
+    "accountNo" : "2222",
+    "status" : "Y",
+    "lastUpdate" : {
+        "at" : "2021-03-03",
+        "by" : "nakul"
+    },
+    "relVal" : [{"to" : "15", "from" : "53"},
+    {"to" : "16", "from" : "90"}]
+},
+{
+    "accountNo" : "3333",
+    "status" : "Y",
+    "lastUpdate" : {
+        "at" : "2021-02-02",
+        "by" : "rares"
+    },
+    "relVal" : [{"to" : "19", "from" : "71"},
+    {"to" : "14", "from" : "92"},
+    {"to" : "15", "from" : "91"}]
+}
+]

@@ -1,0 +1,7 @@
+entity:
+  accounts:
+    - testjson.json
+input-path: actual_data/
+output-path: obfuscated_data/
+obfuscation-logs: obfuscation_logs
+nesting-separator: "."
