@@ -1,0 +1,19 @@
+entity:
+  accounts:
+    - accounts.json
+  account-groups:
+    - account-groups.json
+  attribute-values:
+    - attribute-values.json
+  customers:
+    - customers.json
+  suppliers:
+    - suppliers.json
+  general-ledger-transactions:
+    - general-ledger-transactions.json
+  relations:
+    - relations.json
+input-path: actual_data/
+output-path: obfuscated_data/
+obfuscation-logs: obfuscation_logs
+nesting-separator: "."
