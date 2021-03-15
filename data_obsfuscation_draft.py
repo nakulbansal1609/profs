@@ -1,41 +1,92 @@
-import pandas as pd
-import numpy as np
-import random
-from datetime import datetime, timedelta
-from random import randrange, uniform
-import re
-
-################### Numeric Obfuscation ###############
-#### Int Value ####
-irand = randrange(0, 10)
-#### Float Value ####
-frand = uniform(0, 10)
-
 ##### Functions to be called in Data Obfuscation ####
+##### Rule Processing #####
+def rule_procc(rule):
+    import re
+    ####
+    if rule.startswith('String'):
+        result = re.search(r'\(([^()]*)\)$', rule).group(1).split(',')[1].strip().replace("'", '')
+        rule = 'string'
+        return (rule,result)
+    elif rule.startswith('Numeric'):
+        result = re.search(r'\(([^()]*)\)$', rule).group(1).split(',')[1].strip().replace("'", '')
+        rule='numeric'
+        return (rule,result)
+    elif rule.startswith('Datetime'):
+        result = re.search(r'\(([^()]*)\)$', rule).group(1).split(',')[1].strip().replace("'", '')
+        rule='datetime'
+        return (rule,result)
+    elif rule.startswith('DateOb'):
+        result = re.search(r'\(([^()]*)\)$', rule).group(1).split(',')[1].strip().replace("'", '')
+        rule='date'
+        return (rule,result)
+    elif rule.startswith('DateYY'):
+        result = re.search(r'\(([^()]*)\)$', rule).group(1).split(',')[1].strip().replace("'", '')
+        rule='date'
+        return (rule,result)
+    elif rule.startswith('RandomItem'):
+        rule='randomItem'
+        result = ''
+        return (rule,result)
+    elif rule.startswith('RandomBool'):
+        rule = 'randomBool'
+        result = ''
+        return (rule,result)
+    else:
+        raise ValueError("Rule passed not in the list of defined ones")
 ##### Datetime Obfuscation #####
-def add_days(curr_date,variance):
-    curr_date = curr_date + timedelta(variance)
+def add_days(curr_date,variance,rule):
+    from datetime import datetime, timedelta
+    ####
+    if type(curr_date) is str:
+        if rule == 'datetime':
+            curr_date = datetime.strptime(curr_date, '%Y-%m-%d %H:%M:%S.%f') + timedelta(int(variance))
+        elif rule == 'date':
+            if curr_date == '0':
+                return curr_date
+            else:
+                curr_date = datetime.strftime(datetime.strptime(curr_date, '%Y%m') + timedelta(int(variance)), '%Y%m')
     return curr_date
-def subtract_days(curr_date,variance):
-    curr_date = curr_date - timedelta(variance)
-    return 
+def subtract_days(curr_date,variance,rule):
+    from datetime import datetime, timedelta
+    ####
+    if type(curr_date) is str:
+        if rule == 'datetime':
+            curr_date = datetime.strptime(curr_date, '%Y-%m-%d %H:%M:%S.%f') - timedelta(int(variance))
+        elif rule == 'date':
+            if curr_date == '0':
+                return curr_date
+            else:
+                curr_date = datetime.strftime(datetime.strptime(curr_date, '%Y%m') + timedelta(int(variance)), '%Y%m')
+    return curr_date
 ##### Numeric Obfuscation #####
 def add_number(curr_number,variance):
-    curr_number = curr_number + variance
+    if type(curr_number) is str:
+        curr_number = int(curr_number)
+        curr_number += int(variance)
+    elif (type(curr_number) is float) or (type(curr_number) is int):
+        curr_number += int(variance)
     return curr_number
 def subtract_number(curr_number,variance):
-    curr_number = curr_number - variance
+    if type(curr_number) is str:
+        curr_number = int(curr_number)
+        curr_number -= int(variance)
+    elif (type(curr_number) is float) or (type(curr_number) is int):
+        curr_number -= int(variance)
     return curr_number
 ##### String Obfuscation #####
 def num_obs(lst):
+    import string
+    ####
     if lst.isdigit():
         lst_fin = ''.join([random.choice(string.digits) for ind in range(len(lst))])
     elif lst.isalpha():
-        lst_fin = ''.join([random.choice(ascii_letters) for ind in range(len(lst))])
+        lst_fin = ''.join([random.choice(string.ascii_letters) for ind in range(len(lst))])
     else:
         lst_fin = lst
     return lst_fin
 def string_obfuscation(value,filter):
+    import re
+    ####
     list_substrings = re.findall(r'[A-Za-z]+|\d+| |[^\w\s]', value)
     if filter=='DEFAULT':
         list_substrings = [num_obs(x) for x in list_substrings]
@@ -51,21 +102,27 @@ def string_obfuscation(value,filter):
     return obfus_string
 
 #### Data Obfuscation ####
-def data_obsfuscation(value):
-
+def data_obsfuscation(value, rule):
+    import string
+    import re
+    from datetime import datetime, timedelta
+    import random
+    #### Process Rule ####
+    rule,result = rule_procc(rule)
     #### String Obfuscation ####
-    value = string_obfuscation(value,'DEFAULT')
+    if rule == 'string':
+        value = string_obfuscation(value,result)
     #### Numeric Obfuscation ####
-    if type(value) is np.int64:
-        value = random.choice([add_number(x,randrange(0, x)),subtract_number(x,randrange(0, x))])
-    #### DatetimeObfuscation ####
-    elif type(value) is pd.Timestamp:
-        value = random.choice([add_days(x,random.randint(1,30)),subtract_days(x,random.randint(1,30))])
+    elif rule == 'numeric':
+        value = random.choice([add_number(value,result),subtract_number(value,result)])
+    #### DateObfuscation && DatetimeObfuscation ####
+    elif (rule == 'date') or (rule == 'datetime'):
+        value = random.choice([add_days(value,result,rule),subtract_days(value,result,rule)])
     #### RandomItem ####
-    elif type(value) is list:
+    elif rule == 'randomItem':
         value = random.choice(value)
     #### RandomBool ####
-    elif type(value) is None:
+    elif rule == 'randomBool':
         value = random.randint(0, 1)
     else:
         value = None
